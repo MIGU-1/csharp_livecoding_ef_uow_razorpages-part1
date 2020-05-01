@@ -1,4 +1,6 @@
 using CoffeeSlotMachine.Core;
+using CoffeeSlotMachine.Core.Contracts;
+using CoffeeSlotMachine.Core.Entities;
 using CoffeeSlotMachine.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -10,21 +12,43 @@ namespace CoffeeSlotMachine.ControllerTest
   [TestClass]
   public class ControllerTest
   {
+    public TestContext TestContext { get; set; }
+
+    private ApplicationDbContext _dbContext;
+
     [TestInitialize]
-    public void MyTestInitialize()
+    public async Task InitializeTest()
     {
-      using (ApplicationDbContext applicationDbContext = new ApplicationDbContext())
-      {
-        applicationDbContext.Database.EnsureDeleted();
-        applicationDbContext.Database.Migrate();
-      }
+      _dbContext = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
+         .UseInMemoryDatabase(TestContext.TestName)
+         .Options);
+
+      await _dbContext.Database.EnsureDeletedAsync();
+
+      await _dbContext.Coins.AddAsync(new Coin { CoinValue = 5, Amount = 3 });
+      await _dbContext.Coins.AddAsync(new Coin { CoinValue = 10, Amount = 3 });
+      await _dbContext.Coins.AddAsync(new Coin { CoinValue = 20, Amount = 3 });
+      await _dbContext.Coins.AddAsync(new Coin { CoinValue = 50, Amount = 3 });
+      await _dbContext.Coins.AddAsync(new Coin { CoinValue = 100, Amount = 3 });
+      await _dbContext.Coins.AddAsync(new Coin { CoinValue = 200, Amount = 3 });
+      await _dbContext.Products.AddAsync(new Product { Name = "Cappuccino", PriceInCents = 65 });
+      await _dbContext.Products.AddAsync(new Product { Name = "Doppio", PriceInCents = 80 });
+      await _dbContext.Products.AddAsync(new Product { Name = "Espresso", PriceInCents = 50 });
+      await _dbContext.Products.AddAsync(new Product { Name = "Kaffee Crema", PriceInCents = 70 });
+      await _dbContext.Products.AddAsync(new Product { Name = "Latte", PriceInCents = 50 });
+      await _dbContext.Products.AddAsync(new Product { Name = "Lungo", PriceInCents = 65 });
+      await _dbContext.Products.AddAsync(new Product { Name = "Machiato", PriceInCents = 75 });
+      await _dbContext.Products.AddAsync(new Product { Name = "Mocca", PriceInCents = 55 });
+      await _dbContext.Products.AddAsync(new Product { Name = "Ristretto", PriceInCents = 60 });
+      await _dbContext.SaveChangesAsync();
     }
 
+    private IUnitOfWork GetUnitOfWork() => new UnitOfWork(_dbContext);
 
-    [TestMethod()]
+    [TestMethod]
     public async Task T01_GetCoinDepot_CoinTypesCount_ShouldReturn6Types_3perType_SumIs1155Cents()
     {
-      var controller = new OrderController(new UnitOfWork());
+      var controller = new OrderController(GetUnitOfWork());
       var depot = await controller.GetCoinDepotAsync();
       Assert.AreEqual(6, depot.Count(), "Sechs Münzarten im Depot");
       foreach (var coin in depot)
@@ -35,20 +59,20 @@ namespace CoffeeSlotMachine.ControllerTest
       Assert.AreEqual(1155, sumOfCents, "Beim Start sind 1155 Cents im Depot");
     }
 
-    [TestMethod()]
+    [TestMethod]
     public async Task T02_GetProducts_9Products_FromCappuccinoToRistretto()
     {
-      var statisticsController = new OrderController(new UnitOfWork());
+      var statisticsController = new OrderController(GetUnitOfWork());
       var products = (await statisticsController.GetProductsAsync()).ToArray();
       Assert.AreEqual(9, products.Length, "Neun Produkte wurden erzeugt");
       Assert.AreEqual("Cappuccino", products[0].Name);
       Assert.AreEqual("Ristretto", products[8].Name);
     }
 
-    [TestMethod()]
+    [TestMethod]
     public async Task T03_BuyOneCoffee_OneCoinIsEnough_CheckCoinsAndOrders()
     {
-      UnitOfWork unitOfWork = new UnitOfWork();
+      IUnitOfWork unitOfWork = GetUnitOfWork();
       OrderController controller = new OrderController(unitOfWork);
       var products = await controller.GetProductsAsync();
       var product = products.Single(p => p.Name == "Cappuccino");
@@ -71,10 +95,10 @@ namespace CoffeeSlotMachine.ControllerTest
       Assert.AreEqual("Cappuccino", orders[0].Product.Name, "Produktname Cappuccino");
     }
 
-    [TestMethod()]
+    [TestMethod]
     public async Task T04_BuyOneCoffee_ExactTHrowInOneCoin_CheckCoinsAndOrders()
     {
-      UnitOfWork unitOfWork = new UnitOfWork();
+      IUnitOfWork unitOfWork = GetUnitOfWork();
       OrderController controller = new OrderController(unitOfWork);
       var products = await controller.GetProductsAsync();
       var product = products.Single(p => p.Name == "Latte");
@@ -97,10 +121,10 @@ namespace CoffeeSlotMachine.ControllerTest
       Assert.AreEqual("Latte", orders[0].Product.Name, "Produktname Latte");
     }
 
-    [TestMethod()]
+    [TestMethod]
     public async Task T05_BuyOneCoffee_MoreCoins_CheckCoinsAndOrders()
     {
-      UnitOfWork unitOfWork = new UnitOfWork();
+      IUnitOfWork unitOfWork = GetUnitOfWork();
       OrderController controller = new OrderController(unitOfWork);
       var products = await controller.GetProductsAsync();
       var product = products.Single(p => p.Name == "Cappuccino");
@@ -137,10 +161,10 @@ namespace CoffeeSlotMachine.ControllerTest
     }
 
 
-    [TestMethod()]
+    [TestMethod]
     public async Task T06_BuyMoreCoffees_OneCoins_CheckCoinsAndOrders()
     {
-      UnitOfWork unitOfWork = new UnitOfWork();
+      IUnitOfWork unitOfWork = GetUnitOfWork();
       OrderController controller = new OrderController(unitOfWork);
       var products = await controller.GetProductsAsync();
       var product = products.Single(p => p.Name == "Cappuccino");
@@ -162,10 +186,10 @@ namespace CoffeeSlotMachine.ControllerTest
     }
 
 
-    [TestMethod()]
+    [TestMethod]
     public async Task T07_BuyMoreCoffees_UntilDonation_CheckCoinsAndOrders()
     {
-      UnitOfWork unitOfWork = new UnitOfWork();
+      IUnitOfWork unitOfWork = GetUnitOfWork();
       OrderController controller = new OrderController(unitOfWork);
       var products = await controller.GetProductsAsync();
       var product = products.Single(p => p.Name == "Cappuccino");

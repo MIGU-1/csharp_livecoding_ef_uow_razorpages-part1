@@ -22,7 +22,7 @@ namespace CoffeeSlotMachine.Persistence
 
     public async Task<Coin> GetByIdAsync(int id) => await _dbContext.Coins.FindAsync(id);
 
-    public async Task InsertAsync(Coin coin) => await _dbContext.Coins.AddAsync(coin);
+    public async Task AddAsync(Coin coin) => await _dbContext.Coins.AddAsync(coin);
 
     public async Task<bool> DeleteAsync(int id)
     {

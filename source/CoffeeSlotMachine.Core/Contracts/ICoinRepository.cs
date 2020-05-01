@@ -10,7 +10,7 @@ namespace CoffeeSlotMachine.Core.Contracts
     Task<IEnumerable<Coin>> GetOrderedDescendingByValueAsync();
     Task<Coin> GetByIdAsync(int id);
     
-    Task InsertAsync(Coin coin);
+    Task AddAsync(Coin coin);
     Task<bool> DeleteAsync(int id);
   }
 }

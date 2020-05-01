@@ -1,14 +1,15 @@
-﻿namespace CoffeeSlotMachine.Core.Contracts
+﻿using System.Threading.Tasks;
+
+namespace CoffeeSlotMachine.Core.Contracts
 {
-    public interface IUnitOfWork
-    {
-        IProductRepository Products { get; }
-        IOrderRepository Orders { get; }
+  public interface IUnitOfWork
+  {
+    IProductRepository Products { get; }
+    IOrderRepository Orders { get; }
+    ICoinRepository Coins { get; }
 
-        ICoinRepository Coins { get; }
-
-        void Save();
-
-        void InitializeDatabase();
-    }
+    Task SaveAsync();
+    Task InitializeDatabaseAsync();
+    Task DeleteDatabaseAsync();
+  }
 }

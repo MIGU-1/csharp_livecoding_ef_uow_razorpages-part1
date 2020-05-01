@@ -44,7 +44,7 @@ namespace CoffeeSlotMachine.Core
 
       await _unitOfWork.Orders.InsertAsync(order);
 
-      _unitOfWork.Save();
+      await _unitOfWork.SaveAsync();
 
       return order;
     }
@@ -62,7 +62,8 @@ namespace CoffeeSlotMachine.Core
       {
         order.FinishPayment(await _unitOfWork.Coins.GetAllAsync());
       }
-      _unitOfWork.Save();
+      
+      await _unitOfWork.SaveAsync();
       return hasPaidEnough;
     }
 
