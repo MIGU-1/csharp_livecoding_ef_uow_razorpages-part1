@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace CoffeeSlotMachine.Web.Pages
 {
@@ -49,14 +50,14 @@ namespace CoffeeSlotMachine.Web.Pages
             }
         }
 
-        public void OnGet(int orderId)
+        public async Task OnGet(int orderId)
         {
             ViewData["Message"] = "Enjoy your Coffee";
 
             OrderController orderController = new OrderController(_unitOfWork);
 
-            ActualOrder = _unitOfWork.Orders.GetByIdWithProductAndCoins(orderId);
-            CoinDepotString = orderController.GetCoinDepotString();
+            ActualOrder = await _unitOfWork.Orders.GetByIdWithProductAndCoinsAsync(orderId);
+            CoinDepotString = await orderController.GetCoinDepotStringAsync();
         }
 
         public IActionResult OnPostNextCoffee()

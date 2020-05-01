@@ -24,7 +24,7 @@ namespace CoffeeSlotMachine.ControllerTest
         public void T01_GetCoinDepot_CoinTypesCount_ShouldReturn6Types_3perType_SumIs1155Cents()
         {
             var controller = new OrderController(new UnitOfWork());
-            var depot = controller.GetCoinDepot().ToArray();
+            var depot = controller.GetCoinDepotAsync().ToArray();
             Assert.AreEqual(6, depot.Count(), "Sechs Münzarten im Depot");
             foreach (var coin in depot)
             {
@@ -38,7 +38,7 @@ namespace CoffeeSlotMachine.ControllerTest
         public void T02_GetProducts_9Products_FromCappuccinoToRistretto()
         {
             var statisticsController = new OrderController(new UnitOfWork());
-            var products = statisticsController.GetProducts().ToArray();
+            var products = statisticsController.GetProductsAsync().ToArray();
             Assert.AreEqual(9, products.Length, "Neun Produkte wurden erzeugt");
             Assert.AreEqual("Cappuccino", products[0].Name);
             Assert.AreEqual("Ristretto", products[8].Name);
@@ -49,7 +49,7 @@ namespace CoffeeSlotMachine.ControllerTest
         {
             UnitOfWork unitOfWork = new UnitOfWork();
             OrderController controller = new OrderController(unitOfWork);
-            var products = controller.GetProducts();
+            var products = controller.GetProductsAsync();
             var product = products.Single(p => p.Name == "Cappuccino");
             var order = controller.OrderCoffee(product);
             bool isFinished = controller.InsertCoin(order, 100);
@@ -59,10 +59,10 @@ namespace CoffeeSlotMachine.ControllerTest
             Assert.AreEqual(0, order.DonationCents);
             Assert.AreEqual("20;10;5", order.ReturnCoinValues);
             // Depot überprüfen
-            var coins = controller.GetCoinDepot().ToArray();
+            var coins = controller.GetCoinDepotAsync().ToArray();
             int sumOfCents = coins.Sum(c => c.CoinValue * c.Amount);
             Assert.AreEqual(1220, sumOfCents, "Beim Start sind 1155 Cents + 65 Cents für Cappuccino");
-            Assert.AreEqual("3*200 + 4*100 + 3*50 + 2*20 + 2*10 + 2*5", controller.GetCoinDepotString());
+            Assert.AreEqual("3*200 + 4*100 + 3*50 + 2*20 + 2*10 + 2*5", controller.GetCoinDepotStringAsync());
             var orders = unitOfWork.Orders.GetAllWithProduct().ToArray();
             Assert.AreEqual(1, orders.Length, "Es ist genau eine Bestellung");
             Assert.AreEqual(0, orders[0].DonationCents, "Keine Spende");
@@ -75,7 +75,7 @@ namespace CoffeeSlotMachine.ControllerTest
         {
             UnitOfWork unitOfWork = new UnitOfWork();
             OrderController controller = new OrderController(unitOfWork);
-            var products = controller.GetProducts();
+            var products = controller.GetProductsAsync();
             var product = products.Single(p => p.Name == "Latte");
             var order = controller.OrderCoffee(product);
             bool isFinished = controller.InsertCoin(order, 50);
@@ -85,10 +85,10 @@ namespace CoffeeSlotMachine.ControllerTest
             Assert.AreEqual(0, order.DonationCents);
             Assert.AreEqual("", order.ReturnCoinValues);
             // Depot überprüfen
-            var coins = controller.GetCoinDepot().ToArray();
+            var coins = controller.GetCoinDepotAsync().ToArray();
             int sumOfCents = coins.Sum(c => c.CoinValue * c.Amount);
             Assert.AreEqual(1205, sumOfCents, "Beim Start sind 1155 Cents + 50 Cents für Latte");
-            Assert.AreEqual("3*200 + 3*100 + 4*50 + 3*20 + 3*10 + 3*5", controller.GetCoinDepotString());
+            Assert.AreEqual("3*200 + 3*100 + 4*50 + 3*20 + 3*10 + 3*5", controller.GetCoinDepotStringAsync());
             var orders = unitOfWork.Orders.GetAllWithProduct().ToArray();
             Assert.AreEqual(1, orders.Length, "Es ist genau eine Bestellung");
             Assert.AreEqual(0, orders[0].DonationCents, "Keine Spende");
@@ -101,7 +101,7 @@ namespace CoffeeSlotMachine.ControllerTest
         {
             UnitOfWork unitOfWork = new UnitOfWork();
             OrderController controller = new OrderController(unitOfWork);
-            var products = controller.GetProducts();
+            var products = controller.GetProductsAsync();
             var product = products.Single(p => p.Name == "Cappuccino");
             var order = controller.OrderCoffee(product);
             bool isFinished = controller.InsertCoin(order, 10);
@@ -120,7 +120,7 @@ namespace CoffeeSlotMachine.ControllerTest
             Assert.AreEqual(false, isFinished, "45 Cent genügen nicht");
             Assert.AreEqual(45, order.ThrownInCents, "Einwurf stimmt nicht");
             Assert.AreEqual("10;10;20;5", order.ThrownInCoinValues);
-            Assert.AreEqual("3*200 + 3*100 + 3*50 + 3*20 + 3*10 + 3*5", controller.GetCoinDepotString());
+            Assert.AreEqual("3*200 + 3*100 + 3*50 + 3*20 + 3*10 + 3*5", controller.GetCoinDepotStringAsync());
             isFinished = controller.InsertCoin(order, 50);
             Assert.AreEqual(true, isFinished, "95 Cent genügen");
             Assert.AreEqual(95, order.ThrownInCents, "Einwurf stimmt nicht");
@@ -129,10 +129,10 @@ namespace CoffeeSlotMachine.ControllerTest
             Assert.AreEqual(0, order.DonationCents);
             Assert.AreEqual("20;10", order.ReturnCoinValues);
             // Depot überprüfen
-            var coins = controller.GetCoinDepot().ToArray();
+            var coins = controller.GetCoinDepotAsync().ToArray();
             int sumOfCents = coins.Sum(c => c.CoinValue * c.Amount);
             Assert.AreEqual(1220, sumOfCents, "Beim Start sind 1155 Cents + 65 Cents für Cappuccino");
-            Assert.AreEqual("3*200 + 3*100 + 4*50 + 3*20 + 4*10 + 4*5", controller.GetCoinDepotString());
+            Assert.AreEqual("3*200 + 3*100 + 4*50 + 3*20 + 4*10 + 4*5", controller.GetCoinDepotStringAsync());
         }
 
 
@@ -141,22 +141,22 @@ namespace CoffeeSlotMachine.ControllerTest
         {
             UnitOfWork unitOfWork = new UnitOfWork();
             OrderController controller = new OrderController(unitOfWork);
-            var products = controller.GetProducts().ToArray();
+            var products = controller.GetProductsAsync().ToArray();
             var product = products.Single(p => p.Name == "Cappuccino");
             var order = controller.OrderCoffee(product);
             bool isFinished = controller.InsertCoin(order, 100);
             Assert.IsTrue(isFinished);
-            Assert.AreEqual("3*200 + 4*100 + 3*50 + 2*20 + 2*10 + 2*5", controller.GetCoinDepotString());
+            Assert.AreEqual("3*200 + 4*100 + 3*50 + 2*20 + 2*10 + 2*5", controller.GetCoinDepotStringAsync());
             product = products.Single(p => p.Name == "Latte");
             order = controller.OrderCoffee(product);
             isFinished = controller.InsertCoin(order, 100);
             Assert.IsTrue(isFinished);
-            Assert.AreEqual("3*200 + 5*100 + 2*50 + 2*20 + 2*10 + 2*5", controller.GetCoinDepotString());
+            Assert.AreEqual("3*200 + 5*100 + 2*50 + 2*20 + 2*10 + 2*5", controller.GetCoinDepotStringAsync());
             product = products.Single(p => p.Name == "Cappuccino");
             order = controller.OrderCoffee(product);
             isFinished = controller.InsertCoin(order, 200);
             Assert.IsTrue(isFinished);
-            Assert.AreEqual("4*200 + 4*100 + 2*50 + 1*20 + 1*10 + 1*5", controller.GetCoinDepotString());
+            Assert.AreEqual("4*200 + 4*100 + 2*50 + 1*20 + 1*10 + 1*5", controller.GetCoinDepotStringAsync());
             Assert.AreEqual(0, order.DonationCents);
         }
 
@@ -166,28 +166,28 @@ namespace CoffeeSlotMachine.ControllerTest
         {
             UnitOfWork unitOfWork = new UnitOfWork();
             OrderController controller = new OrderController(unitOfWork);
-            var products = controller.GetProducts().ToArray();
+            var products = controller.GetProductsAsync().ToArray();
             var product = products.Single(p => p.Name == "Cappuccino");
             var order = controller.OrderCoffee(product);
             bool isFinished = controller.InsertCoin(order, 200);
             Assert.IsTrue(isFinished);
-            Assert.AreEqual("4*200 + 2*100 + 3*50 + 2*20 + 2*10 + 2*5", controller.GetCoinDepotString());
+            Assert.AreEqual("4*200 + 2*100 + 3*50 + 2*20 + 2*10 + 2*5", controller.GetCoinDepotStringAsync());
             product = products.Single(p => p.Name == "Cappuccino");
             order = controller.OrderCoffee(product);
             isFinished = controller.InsertCoin(order, 200);
             Assert.IsTrue(isFinished);
-            Assert.AreEqual("5*200 + 1*100 + 3*50 + 1*20 + 1*10 + 1*5", controller.GetCoinDepotString());
+            Assert.AreEqual("5*200 + 1*100 + 3*50 + 1*20 + 1*10 + 1*5", controller.GetCoinDepotStringAsync());
             product = products.Single(p => p.Name == "Cappuccino");
             order = controller.OrderCoffee(product);
             isFinished = controller.InsertCoin(order, 200);
             Assert.IsTrue(isFinished);
-            Assert.AreEqual("6*200 + 0*100 + 3*50 + 0*20 + 0*10 + 0*5", controller.GetCoinDepotString());
+            Assert.AreEqual("6*200 + 0*100 + 3*50 + 0*20 + 0*10 + 0*5", controller.GetCoinDepotStringAsync());
             Assert.AreEqual(0, order.DonationCents);
             product = products.Single(p => p.Name == "Cappuccino");
             order = controller.OrderCoffee(product);
             isFinished = controller.InsertCoin(order, 200);
             Assert.IsTrue(isFinished);
-            Assert.AreEqual("7*200 + 0*100 + 1*50 + 0*20 + 0*10 + 0*5", controller.GetCoinDepotString());
+            Assert.AreEqual("7*200 + 0*100 + 1*50 + 0*20 + 0*10 + 0*5", controller.GetCoinDepotStringAsync());
             Assert.AreEqual(35, order.DonationCents);
         }
 

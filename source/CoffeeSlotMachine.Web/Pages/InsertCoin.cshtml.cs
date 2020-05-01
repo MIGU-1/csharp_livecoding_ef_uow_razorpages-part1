@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CoffeeSlotMachine.Web.Pages
 {
@@ -29,16 +30,16 @@ namespace CoffeeSlotMachine.Web.Pages
             _unitOfWork = unitOfWork;
         }
 
-        public void OnGet(int orderId)
+        public async Task OnGet(int orderId)
         {
             ViewData["Message"] = "Insert Coin";
 
-            Coins = _unitOfWork.Coins.GetAll();
+            Coins = await _unitOfWork.Coins.GetAllAsync();
             OrderId = orderId;
-            ActualOrder = _unitOfWork.Orders.GetByIdWithProductAndCoins(orderId);
+            ActualOrder = await _unitOfWork.Orders.GetByIdWithProductAndCoinsAsync(orderId);
         }
 
-        public IActionResult OnPostInsertCoin()
+        public async Task<IActionResult> OnPostInsertCoin()
         {
             if (!ModelState.IsValid)
             {
@@ -47,12 +48,12 @@ namespace CoffeeSlotMachine.Web.Pages
 
 
             OrderController orderController = new OrderController(_unitOfWork);
-            var order = _unitOfWork.Orders.GetByIdWithProductAndCoins(OrderId);
+            var order = await _unitOfWork.Orders.GetByIdWithProductAndCoinsAsync(OrderId);
 
-            Coins = _unitOfWork.Coins.GetAll();
+            Coins = await _unitOfWork.Coins.GetAllAsync();
             var coin = Coins.Single(ct => ct.Id == InsertedCoinId);
 
-            if (orderController.InsertCoin(order, coin.CoinValue))
+            if (await orderController.InsertCoinAsync(order, coin.CoinValue))
             {
                 return RedirectToPage(
                     "/CoffeeReady",
