@@ -1,0 +1,56 @@
+﻿@page
+@model CoffeeSlotMachine.Web.Pages.OrderCoffeeThruListModel
+@{
+  ViewData["Title"] = "OrderCoffeeThruList";
+}
+
+<h2>@ViewData["Message"]</h2>
+
+<form method="post">
+
+  <table class="table">
+
+    <thead>
+      <tr>
+        <th>
+          @Html.DisplayNameFor(model => model.OrderCoffeeItems.FirstOrDefault().ProductName)
+        </th>
+        <th>
+          @Html.DisplayNameFor(model => model.OrderCoffeeItems.FirstOrDefault().PriceInCents)
+        </th>
+        <th>
+          @Html.DisplayNameFor(model => model.OrderCoffeeItems.FirstOrDefault().NrOfOrders)
+        </th>
+        <th></th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      @foreach (var line in Model.OrderCoffeeItems)
+      {
+        <tr>
+          <td>
+            @Html.DisplayFor(_ => line.ProductName)
+          </td>
+          <td>
+            @Html.DisplayFor(_ => line.PriceInCents)
+          </td>
+          <td>
+            @Html.DisplayFor(_ => line.NrOfOrders)
+          </td>
+          <td>
+            <button type="submit" 
+                    class="btn btn-primary"
+                    asp-page-handler="ProductSelected"
+                    asp-route-productId="@line.ProductId">Select Product</button>
+          </td>
+        </tr>
+
+      }
+
+    </tbody>
+
+  </table>
+
+</form>
